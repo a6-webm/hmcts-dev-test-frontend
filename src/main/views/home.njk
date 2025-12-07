@@ -1,4 +1,8 @@
 {% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/character-count/macro.njk" import govukCharacterCount %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/error-summary/macro.njk" import govukErrorSummary %}
 
 {% extends "template.njk" %}
 
@@ -8,11 +12,85 @@ but ultimately it is up to you -->
 {% block content %}
   <h1 class="govuk-heading-xl">Welcome to your dev test!</h1>
 
-  <!-- The freedom is yours. You can design the solution however you like, however there is a starting point provided
-  to ensure you have both services running. You may want to make use of the Gov UK Components:
-  https://design-system.service.gov.uk/components/ to add tabs and so forth :) -->
+  {% if error %}
+    {{ govukErrorSummary({
+      titleText: "There was a problem creating your task."
+    }) }}
+  {% endif %}
+
+  <h1 class="govuk-heading-l">Create a new task:</h1>
+
+  <form action="/task" method="POST" class="form-task">
+    {{ govukCharacterCount({
+      name: "title",
+      id: "task-title",
+      maxlength: 100,
+      threshold: 90,
+      rows: 1,
+      label: {
+        text: "Enter the name of your task."
+      },
+      attributes: {
+        required: "true"
+      }
+    }) }}
+
+    {{ govukCharacterCount({
+      name: "description",
+      id: "task-description",
+      maxlength: 3000,
+      label: {
+        text: "Enter a longer description of your task."
+      }
+    }) }}
+
+    {{ govukDateInput({
+      id: "task-due-time",
+      namePrefix: "due-time",
+      fieldset: {
+        legend: {
+          text: "Enter when your task is due."
+        }
+      },
+      hint: {
+        text: "For example, 27 3 2025"
+      },
+      items: [
+        {
+          name: "day",
+          classes: "govuk-input--width-2",
+          attributes: {
+            required: "true",
+            pattern: "(3[01])|([12][0-9])|[1-9]"
+          }
+        },
+        {
+          name: "month",
+          classes: "govuk-input--width-2",
+          attributes: {
+            required: "true",
+            type: "number",
+            pattern: "(1[0-2])|[1-9]"
+          }
+        },
+        {
+          name: "year",
+          classes: "govuk-input--width-4",
+          attributes: {
+            required: "true"
+          }
+        }
+      ]
+    }) }}
+
+    {{ govukButton({
+      text: "Create task"
+    }) }}
+  </form>
 
   {% if example.id %}
+
+    <h1 class="govuk-heading-l">Successfully created task:</h1>
 
     {{ govukSummaryList({
       rows: [
@@ -29,23 +107,6 @@ but ultimately it is up to you -->
                 href: "#",
                 text: "Change",
                 visuallyHiddenText: "change case id ?!"
-              }
-            ]
-          }
-        },
-        {
-          key: {
-            text: "Case Number"
-          },
-          value: {
-            text: example.caseNumber
-          },
-          actions: {
-            items: [
-              {
-                href: "#",
-                text: "Change",
-                visuallyHiddenText: "change case number"
               }
             ]
           }
@@ -103,10 +164,10 @@ but ultimately it is up to you -->
         },
         {
           key: {
-           text: "Created Date"
+           text: "Due Date"
           },
           value: {
-           html: example.createdDate
+           html: example.dueTime
           },
           actions: {
            items: [
